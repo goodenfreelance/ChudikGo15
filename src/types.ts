@@ -23,6 +23,7 @@ export interface WorldRules {
   worldBoundsY: number;
   tickRate: number;
   enableCannibalism: boolean;
+  unlimitedElements?: boolean;
 }
 
 export interface PhysicsRules {

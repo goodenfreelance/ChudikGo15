@@ -80,11 +80,11 @@ func NewRoom(worldRadius float64, minBots int, maxFoods int, cb EventCallback) *
 }
 
 func (r *Room) SetTickInterval(ms int) {
-	if ms < 5 {
-		ms = 5
+	if ms < 10 {
+		ms = 10
 	}
-	if ms > 500 {
-		ms = 500
+	if ms > 100 {
+		ms = 100
 	}
 	r.mu.Lock()
 	r.tickIntervalMs = time.Duration(ms) * time.Millisecond
@@ -760,11 +760,17 @@ func (r *Room) Tick() {
 
 	// 6. Resolve creature head bites with Bio-Nuggets drop callback
 	ResolveCreatureBites(r.creatures, func(x, y float64, fType FoodType) {
-		val := 10
+		val := cfg.Economy.FoodBerryValue
+		if val <= 0 {
+			val = 1
+		}
 		if fType == FoodGolden {
-			val = 25
+			val = cfg.Economy.FoodGoldenValue
+			if val <= 0 {
+				val = 5
+			}
 		} else if fType == FoodSuper {
-			val = 15
+			val = int(math.Max(2, float64(val)*2))
 		}
 		id := fmt.Sprintf("food-bionugget-%d-%d", time.Now().UnixNano(), r.rnd.Intn(10000))
 		r.foods[id] = &Food{

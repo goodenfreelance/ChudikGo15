@@ -92,6 +92,14 @@ func (h *Hub) handleMessage(client *Client, msg game.WSInputMessage) {
 				log.Printf("[WS ADMIN] Error updating config: %v", err)
 			} else {
 				log.Printf("[WS ADMIN] Updated world rules config via WebSocket")
+				cfg := game.GetGlobalConfig()
+				updateMsg := game.WSOutputMessage{
+					Type:   "config_updated",
+					Config: &cfg,
+				}
+				if data, err := json.Marshal(updateMsg); err == nil {
+					h.broadcast <- data
+				}
 			}
 		}
 

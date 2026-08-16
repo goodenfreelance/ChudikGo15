@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, RotateCcw, Sparkles, Scale, Zap, Trash2, ArrowUp, ArrowRight, ArrowDown, ArrowLeft, ZoomIn, ZoomOut, Maximize2, Edit3, Crosshair, AlertTriangle, Coins, ShieldCheck, RefreshCw } from 'lucide-react';
 import { Creature, CreatureElement, ElementType } from '../types';
-import { calculatePhysicsForces, getCreatureConnectivity, STARTER_PRESET, ELEMENT_PRICES, calculateCreatureCost, calculateElementsPrice, getElementLabel } from '../utils/creatures';
+import { calculatePhysicsForces, getCreatureConnectivity, STARTER_PRESET, ELEMENT_PRICES, calculateCreatureCost, calculateElementsPrice, getElementLabel, IS_UNLIMITED_MODE, getElementPrice } from '../utils/creatures';
 
 interface CreatureEditorProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Челюсть к голове (🦷)',
     symbol: '🦷',
     weight: 0,
-    price: 18,
+    price: 180,
     desc: 'Крепится строго к голове (👁️). Активирует канибализм: кусает врагов в секторе 60° по направлению головы',
   },
   {
@@ -33,7 +33,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Голова обычная (👁️)',
     symbol: '👁️',
     weight: 0,
-    price: 5,
+    price: 50,
     desc: 'Задает ВПЕРЕД для чудика и ориентацию глаз',
   },
   {
@@ -41,7 +41,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Шарнир (◯)',
     symbol: '◯',
     weight: 0,
-    price: 1,
+    price: 10,
     desc: 'Узел вращения на пересечении клеток (Вес = 0)',
   },
   {
@@ -49,7 +49,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Ребро гориз. (—)',
     symbol: '—',
     weight: 1,
-    price: 1,
+    price: 10,
     desc: 'Каркасная балка длиной 1 клетка (Вес = 1)',
   },
   {
@@ -57,7 +57,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Ребро вертик. (|)',
     symbol: '|',
     weight: 1,
-    price: 1,
+    price: 10,
     desc: 'Каркасная балка длиной 1 клетка (Вес = 1)',
   },
   {
@@ -65,7 +65,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Ребро диаг. / (↙-↗)',
     symbol: '/',
     weight: 1,
-    price: 1,
+    price: 10,
     desc: 'Диагональ / (Вес = 1)',
   },
   {
@@ -73,7 +73,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Ребро диаг. \\ (↖-↘)',
     symbol: '\\',
     weight: 1,
-    price: 1,
+    price: 10,
     desc: 'Диагональ \\ (Вес = 1)',
   },
   {
@@ -81,7 +81,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Мышца влево (⟲)',
     symbol: '⟲',
     weight: 0,
-    price: 2,
+    price: 25,
     desc: 'Крепится к шарниру (◯). Тяга влево',
   },
   {
@@ -89,7 +89,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Мышца вправо (⟳)',
     symbol: '⟳',
     weight: 0,
-    price: 2,
+    price: 25,
     desc: 'Крепится к шарниру (◯). Тяга вправо',
   },
   {
@@ -97,7 +97,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Случ. мышца влево (🎲⟲)',
     symbol: '🎲⟲',
     weight: 0,
-    price: 3,
+    price: 35,
     desc: 'Случайный шанс сокращения (5%-90%)',
   },
   {
@@ -105,7 +105,7 @@ const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: stri
     label: 'Случ. мышца вправо (🎲⟳)',
     symbol: '🎲⟳',
     weight: 0,
-    price: 3,
+    price: 35,
     desc: 'Случайный шанс сокращения (5%-90%)',
   },
   {
@@ -204,7 +204,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
   const handleCleanDisconnected = () => {
     if (connectivity.disconnectedIds.size === 0) return;
     const toRemove = elements.filter((el) => connectivity.disconnectedIds.has(el.id));
-    const refund = toRemove.reduce((sum, el) => sum + (ELEMENT_PRICES[el.type] ?? 10), 0);
+    const refund = toRemove.reduce((sum, el) => sum + getElementPrice(el.type), 0);
     setElements((prev) => prev.filter((el) => !connectivity.disconnectedIds.has(el.id)));
     triggerRefundNotice(refund, `${toRemove.length} оторванных деталей`);
     setPlacementWarning(null);
@@ -214,7 +214,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
   const handleCleanUnattachedMuscles = () => {
     if (connectivity.unattachedMuscleIds.size === 0) return;
     const toRemove = elements.filter((el) => connectivity.unattachedMuscleIds.has(el.id));
-    const refund = toRemove.reduce((sum, el) => sum + (ELEMENT_PRICES[el.type] ?? 25), 0);
+    const refund = toRemove.reduce((sum, el) => sum + getElementPrice(el.type), 0);
     setElements((prev) => prev.filter((el) => !connectivity.unattachedMuscleIds.has(el.id)));
     triggerRefundNotice(refund, `${toRemove.length} мышц без шарниров`);
     setPlacementWarning(null);
@@ -224,7 +224,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
   const handleCleanUnattachedJaws = () => {
     if (connectivity.unattachedJawIds.size === 0) return;
     const toRemove = elements.filter((el) => connectivity.unattachedJawIds.has(el.id));
-    const refund = toRemove.reduce((sum, el) => sum + (ELEMENT_PRICES[el.type] ?? 180), 0);
+    const refund = toRemove.reduce((sum, el) => sum + getElementPrice(el.type), 0);
     setElements((prev) => prev.filter((el) => !connectivity.unattachedJawIds.has(el.id)));
     triggerRefundNotice(refund, `${toRemove.length} челюстей без головы`);
     setPlacementWarning(null);
@@ -374,11 +374,14 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
   const connectivity = getCreatureConnectivity(elements);
   const currentElementsCost = calculateElementsPrice(elements);
   const costDiff = currentElementsCost - initialElementsCost;
-  const currentFood = typeof food === 'number' ? food : (typeof bankFood === 'number' ? bankFood : (editingCreature?.foodEaten ?? editingCreature?.bankFood ?? 0));
+  const editingCreatureFood = editingCreature ? Math.max(editingCreature.foodEaten ?? 0, editingCreature.bankFood ?? 0) : 0;
+  const currentFood = editingCreature
+    ? (editingCreatureFood > 0 ? editingCreatureFood : (typeof food === 'number' ? food : (typeof bankFood === 'number' ? bankFood : 0)))
+    : (typeof food === 'number' ? food : (typeof bankFood === 'number' ? bankFood : 0));
   // Available food points for building / replacing parts dynamically
-  const availableFood = currentFood - costDiff;
+  const availableFood = IS_UNLIMITED_MODE ? 999999 : (currentFood - costDiff);
   const refundedFromDismantling = Math.max(0, initialElementsCost - currentElementsCost);
-  const canAfford = availableFood >= 0;
+  const canAfford = IS_UNLIMITED_MODE || availableFood >= 0;
 
   // Auto-dismiss placement warning after 3.5s
   useEffect(() => {
@@ -393,7 +396,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
     if (selectedTool === 'eraser') {
       const toDelete = elements.filter((el) => el.relX === relX && el.relY === relY);
       if (toDelete.length > 0) {
-        const refundAmount = toDelete.reduce((sum, el) => sum + (ELEMENT_PRICES[el.type] ?? 10), 0);
+        const refundAmount = toDelete.reduce((sum, el) => sum + getElementPrice(el.type), 0);
         const labels = toDelete.map((el) => getElementLabel(el.type)).join(', ');
         setElements((prev) => prev.filter((el) => !(el.relX === relX && el.relY === relY)));
         triggerRefundNotice(refundAmount, labels);
@@ -444,9 +447,9 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
     }
 
     // Check budget for new element
-    const toolPrice = ELEMENT_PRICES[selectedTool as ElementType] ?? 10;
+    const toolPrice = getElementPrice(selectedTool as ElementType);
     const toolDef = ELEMENT_TOOLS.find((t) => t.type === selectedTool);
-    if (availableFood < toolPrice) {
+    if (!IS_UNLIMITED_MODE && availableFood < toolPrice) {
       setPlacementWarning(
         `⚠️ Недостаточно еды! "${toolDef?.label || selectedTool}" стоит ${toolPrice} еды (доступно: ${availableFood}). Удалите другие элементы для возврата очков или соберите еду на поле!`
       );
@@ -490,7 +493,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
     const target = elements.find((e) => e.id === id);
     if (!target) return;
 
-    let refundAmount = ELEMENT_PRICES[target.type] ?? 10;
+    let refundAmount = getElementPrice(target.type);
     let label = getElementLabel(target.type);
 
     if (target.type === 'joint') {
@@ -499,7 +502,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
         (el) => el.type.startsWith('muscle-') && el.relX === target.relX && el.relY === target.relY
       );
       if (attachedMuscles.length > 0) {
-        const extraMuscleCost = attachedMuscles.reduce((sum, m) => sum + (ELEMENT_PRICES[m.type] ?? 25), 0);
+        const extraMuscleCost = attachedMuscles.reduce((sum, m) => sum + getElementPrice(m.type), 0);
         refundAmount += extraMuscleCost;
         label = `Шарнир и ${attachedMuscles.length} мышц(ы)`;
       }
@@ -517,7 +520,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
         (el) => el.type === 'head-jaw' && el.relX === target.relX && el.relY === target.relY
       );
       if (attachedJaws.length > 0) {
-        const extraJawCost = attachedJaws.reduce((sum, j) => sum + (ELEMENT_PRICES[j.type] ?? 180), 0);
+        const extraJawCost = attachedJaws.reduce((sum, j) => sum + getElementPrice(j.type), 0);
         refundAmount += extraJawCost;
         label = `Голова и ${attachedJaws.length} челюсть(и)`;
       }
@@ -623,12 +626,18 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
           <div className="md:col-span-5 flex flex-col gap-4">
             {/* Quick Starter Preset Loader & Dynamic Bank/Available Food Indicator */}
             <div className="flex flex-col gap-2 p-3 bg-slate-800/80 border border-slate-700/80 rounded-xl">
+              {IS_UNLIMITED_MODE && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-950/90 border border-emerald-400/80 rounded-lg text-emerald-300 text-2xs font-bold shadow-xs animate-pulse">
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <span>РЕЖИМ БЕЗЛИМИТ: Все элементы 0 еды!</span>
+                </div>
+              )}
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-1.5 bg-emerald-950/70 border border-emerald-500/50 px-2.5 py-1 rounded-lg">
                   <Coins className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span className="text-xs text-slate-300">Доступно еды:</span>
-                  <strong className={`font-mono text-sm ${availableFood >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}`}>
-                    {availableFood}
+                  <strong className={`font-mono text-sm ${availableFood >= 0 || IS_UNLIMITED_MODE ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}`}>
+                    {IS_UNLIMITED_MODE ? '∞ (Безлимит)' : availableFood}
                   </strong>
                 </div>
 
@@ -644,8 +653,8 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
 
               <div className="flex items-center justify-between text-2xs text-slate-400 px-1 pt-1 border-t border-slate-700/50">
                 <span>Баланс еды: <strong className="text-emerald-400 font-mono">{currentFood}</strong></span>
-                <span>В чудике: <strong className="text-indigo-300 font-mono">{currentElementsCost}</strong></span>
-                {refundedFromDismantling > 0 && (
+                <span>В чудике: <strong className="text-indigo-300 font-mono">{IS_UNLIMITED_MODE ? '0 (Безлимит)' : currentElementsCost}</strong></span>
+                {refundedFromDismantling > 0 && !IS_UNLIMITED_MODE && (
                   <span className="text-emerald-400 font-mono font-bold bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-600/30 animate-pulse">
                     ♻️ Возврат: +{refundedFromDismantling}
                   </span>
@@ -679,8 +688,8 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
               </label>
               <div className="grid grid-cols-1 gap-1.5 max-h-56 overflow-y-auto pr-1">
                 {ELEMENT_TOOLS.map((tool) => {
-                  const dynamicPrice = tool.type === 'eraser' ? 0 : (ELEMENT_PRICES[tool.type as ElementType] ?? tool.price);
-                  const isAffordable = tool.type === 'eraser' || availableFood >= dynamicPrice;
+                  const dynamicPrice = tool.type === 'eraser' ? 0 : getElementPrice(tool.type as ElementType);
+                  const isAffordable = tool.type === 'eraser' || IS_UNLIMITED_MODE || availableFood >= dynamicPrice;
                   const isSelected = selectedTool === tool.type;
                   return (
                     <button
@@ -1670,7 +1679,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
                         <button
                           onClick={() => handleDeleteElement(el.id)}
                           className="text-slate-400 hover:text-red-400 hover:bg-red-950/50 p-1 rounded transition flex items-center gap-0.5"
-                          title={`Удалить деталь и вернуть +${ELEMENT_PRICES[el.type] ?? 10} еды в доступный баланс`}
+                          title={`Удалить деталь и вернуть +${getElementPrice(el.type)} еды в доступный баланс`}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -1762,7 +1771,9 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
             >
               {editingCreature ? <Edit3 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
               <span>
-                {editingCreature
+                {IS_UNLIMITED_MODE
+                  ? (editingCreature ? 'Сохранить (Безлимит 0 еды)' : 'Создать (Безлимит 0 еды)')
+                  : editingCreature
                   ? costDiff > 0
                     ? `Сохранить (-${costDiff} еды)`
                     : costDiff < 0

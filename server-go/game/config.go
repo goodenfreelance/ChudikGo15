@@ -11,10 +11,11 @@ import (
 )
 
 type WorldRules struct {
-	WorldBoundsX     float64 `json:"worldBoundsX"`
-	WorldBoundsY     float64 `json:"worldBoundsY"`
-	TickRate         int     `json:"tickRate"`
+	WorldBoundsX      float64 `json:"worldBoundsX"`
+	WorldBoundsY      float64 `json:"worldBoundsY"`
+	TickRate          int     `json:"tickRate"`
 	EnableCannibalism bool    `json:"enableCannibalism"`
+	UnlimitedElements bool    `json:"unlimitedElements"`
 }
 
 type PhysicsRules struct {
@@ -71,6 +72,7 @@ func DefaultWorldConfig() WorldConfig {
 			WorldBoundsY:      100.0,
 			TickRate:          60, // 60 FPS physics tick
 			EnableCannibalism: true,
+			UnlimitedElements: false,
 		},
 		Physics: PhysicsRules{
 			RestitutionCoefficient: 0.45,
@@ -95,19 +97,19 @@ func DefaultWorldConfig() WorldConfig {
 			FoodBerryValue:  1,
 			FoodGoldenValue: 5,
 			ElementPrices: map[string]int{
-				"head-jaw":           18,
-				"head":               5,
-				"muscle-random-left":  3,
-				"muscle-random-right": 3,
-				"muscle-left":         2,
-				"muscle-right":        2,
-				"joint":               1,
-				"edge-h":              1,
-				"edge-v":              1,
-				"edge-d1":             1,
-				"edge-d2":             1,
-				"eye":                 1,
-				"mouth":               1,
+				"head-jaw":           180,
+				"head":               50,
+				"muscle-random-left":  35,
+				"muscle-random-right": 35,
+				"muscle-left":         25,
+				"muscle-right":        25,
+				"joint":               10,
+				"edge-h":              10,
+				"edge-v":              10,
+				"edge-d1":             10,
+				"edge-d2":             10,
+				"eye":                 10,
+				"mouth":               10,
 			},
 		},
 	}

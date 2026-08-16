@@ -3,7 +3,8 @@
     "worldBoundsX": 100.0,
     "worldBoundsY": 100.0,
     "tickRate": 60,
-    "enableCannibalism": true
+    "enableCannibalism": true,
+    "unlimitedElements": false
   },
   "physics": {
     "restitutionCoefficient": 0.45,
@@ -28,19 +29,19 @@
     "foodBerryValue": 1,
     "foodGoldenValue": 5,
     "elementPrices": {
-      "head-jaw": 18,
-      "head": 5,
-      "muscle-random-left": 3,
-      "muscle-random-right": 3,
-      "muscle-left": 2,
-      "muscle-right": 2,
-      "joint": 1,
-      "edge-h": 1,
-      "edge-v": 1,
-      "edge-d1": 1,
-      "edge-d2": 1,
-      "eye": 1,
-      "mouth": 1
+      "head-jaw": 180,
+      "head": 50,
+      "muscle-random-left": 35,
+      "muscle-random-right": 35,
+      "muscle-left": 25,
+      "muscle-right": 25,
+      "joint": 10,
+      "edge-h": 10,
+      "edge-v": 10,
+      "edge-d1": 10,
+      "edge-d2": 10,
+      "eye": 10,
+      "mouth": 10
     }
   }
 }

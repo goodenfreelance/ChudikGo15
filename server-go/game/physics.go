@@ -98,8 +98,11 @@ func StarterPreset() []CreatureElement {
 // GetElementCost returns the food purchase price of an element type
 func GetElementCost(t ElementType) int {
 	cfg := GetGlobalConfig()
+	if cfg.World.UnlimitedElements {
+		return 0
+	}
 	if cfg.Economy.ElementPrices != nil {
-		if cost, ok := cfg.Economy.ElementPrices[string(t)]; ok && cost > 0 {
+		if cost, ok := cfg.Economy.ElementPrices[string(t)]; ok && cost >= 0 {
 			return cost
 		}
 	}

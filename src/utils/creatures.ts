@@ -18,45 +18,59 @@ export const DEFAULT_ECONOMY_CONFIG = {
   foodBerryValue: 1,
   foodGoldenValue: 5,
   elementPrices: {
-    'head-jaw': 18,
-    'head': 5,
-    'muscle-random-left': 3,
-    'muscle-random-right': 3,
-    'muscle-left': 2,
-    'muscle-right': 2,
-    'joint': 1,
-    'edge-h': 1,
-    'edge-v': 1,
-    'edge-d1': 1,
-    'edge-d2': 1,
-    'eye': 1,
-    'mouth': 1,
+    'head-jaw': 180,
+    'head': 50,
+    'muscle-random-left': 35,
+    'muscle-random-right': 35,
+    'muscle-left': 25,
+    'muscle-right': 25,
+    'joint': 10,
+    'edge-h': 10,
+    'edge-v': 10,
+    'edge-d1': 10,
+    'edge-d2': 10,
+    'eye': 10,
+    'mouth': 10,
   } as Record<string, number>,
 };
 
 export let ELEMENT_PRICES: Record<ElementType, number> = {
-  'head-jaw': 18,
-  'head': 5,
-  'muscle-random-left': 3,
-  'muscle-random-right': 3,
-  'muscle-left': 2,
-  'muscle-right': 2,
-  'joint': 1,
-  'edge-h': 1,
-  'edge-v': 1,
-  'edge-d1': 1,
-  'edge-d2': 1,
-  'eye': 1,
-  'mouth': 1,
+  'head-jaw': 180,
+  'head': 50,
+  'muscle-random-left': 35,
+  'muscle-random-right': 35,
+  'muscle-left': 25,
+  'muscle-right': 25,
+  'joint': 10,
+  'edge-h': 10,
+  'edge-v': 10,
+  'edge-d1': 10,
+  'edge-d2': 10,
+  'eye': 10,
+  'mouth': 10,
 };
 
-export function updateElementPrices(customPrices?: Record<string, number>) {
+export let IS_UNLIMITED_MODE = false;
+
+export function setUnlimitedMode(unlimited: boolean) {
+  IS_UNLIMITED_MODE = !!unlimited;
+}
+
+export function updateElementPrices(customPrices?: Record<string, number>, isUnlimited?: boolean) {
+  if (typeof isUnlimited === 'boolean') {
+    IS_UNLIMITED_MODE = isUnlimited;
+  }
   if (!customPrices) return;
   for (const [key, val] of Object.entries(customPrices)) {
     if (typeof val === 'number' && val >= 0) {
       (ELEMENT_PRICES as any)[key] = val;
     }
   }
+}
+
+export function getElementPrice(type: ElementType): number {
+  if (IS_UNLIMITED_MODE) return 0;
+  return ELEMENT_PRICES[type] ?? 10;
 }
 
 // Проверка нахождения внутри Базы (Safe Zone в правом нижнем углу)
@@ -110,6 +124,7 @@ export function getElementLabel(type: ElementType): string {
 }
 
 export function calculateElementsPrice(elements: CreatureElement[]): number {
+  if (IS_UNLIMITED_MODE) return 0;
   return elements.reduce((sum, el) => sum + (ELEMENT_PRICES[el.type] ?? 10), 0);
 }
 
@@ -119,7 +134,7 @@ export function calculateCreatureCost(elements: CreatureElement[]): { totalCost:
   let purchasedCount = 0;
 
   for (const el of elements) {
-    const price = ELEMENT_PRICES[el.type] ?? 10;
+    const price = IS_UNLIMITED_MODE ? 0 : (ELEMENT_PRICES[el.type] ?? 10);
     if (!el.isStarter) {
       totalCost += price;
       refundableCost += price;

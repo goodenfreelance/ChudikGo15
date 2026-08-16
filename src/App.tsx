@@ -109,13 +109,10 @@ export default function App() {
       }
     }
 
-    if (localFood >= amount) {
-      setLocalFood((prev) => Math.max(0, prev - amount));
-      gameWs.send({ type: 'spend_bank_food', bankFoodAmount: amount });
-      return true;
-    }
-    return false;
-  }, [authToken, authUser, localFood]);
+    setLocalFood((prev) => Math.max(0, prev - amount));
+    gameWs.send({ type: 'spend_bank_food', bankFoodAmount: amount });
+    return true;
+  }, [authToken, authUser]);
 
   const handleDepositFood = useCallback(async (amount: number): Promise<boolean> => {
     if (amount <= 0) return true;
@@ -217,8 +214,8 @@ export default function App() {
     fetch('/api/rules')
       .then((res) => res.json())
       .then((cfg) => {
-        if (cfg?.economy?.elementPrices) {
-          updateElementPrices(cfg.economy.elementPrices);
+        if (cfg) {
+          updateElementPrices(cfg.economy?.elementPrices, cfg.world?.unlimitedElements);
         }
       })
       .catch(() => {});
@@ -394,17 +391,27 @@ export default function App() {
     const unsubscribe = gameWs.subscribe((msg) => {
       if (msg.type === 'init') {
         setYourCreatureId(msg.yourId);
+        yourCreatureIdRef.current = msg.yourId;
         setSelectedCreatureId(msg.yourId);
         setIsConnected(true);
+        if (msg.config) {
+          updateElementPrices(msg.config.economy?.elementPrices, msg.config.world?.unlimitedElements);
+        }
+      } else if (msg.type === 'config_updated') {
+        if (msg.config) {
+          updateElementPrices(msg.config.economy?.elementPrices, msg.config.world?.unlimitedElements);
+        }
       } else if (msg.type === 'state') {
         if (msg.worldRadius) {
           setWorldRadius(msg.worldRadius);
         }
         if (msg.creatures) {
-          if (yourCreatureId) {
-            const me = msg.creatures.find((c: any) => c.id === yourCreatureId);
-            if (me && typeof me.foodEaten === 'number') {
-              setLocalFood(me.foodEaten);
+          const myId = yourCreatureIdRef.current;
+          if (myId) {
+            const me = msg.creatures.find((c: any) => c.id === myId);
+            if (me) {
+              const currentFoodVal = typeof me.foodEaten === 'number' ? me.foodEaten : (me.bankFood ?? 0);
+              setLocalFood(currentFoodVal);
             }
           }
           setCreatures((prev) => {
@@ -1313,25 +1320,30 @@ export default function App() {
       </div>
 
       {/* Creature Editor Modal */}
-      {isEditorOpen && (
-        <CreatureEditor
-          isOpen={isEditorOpen}
-          editingCreature={(creatures || []).find((c) => c.id === editingCreatureId) || null}
-          token={authToken}
-          food={localFood}
-          bankFood={localFood}
-          onSpendFood={handleSpendFood}
-          onDepositFood={handleDepositFood}
-          onSpendBankFood={handleSpendFood}
-          onDepositBankFood={handleDepositFood}
-          onClose={() => {
-            setIsEditorOpen(false);
-          }}
-          onSpawnCreature={handleSaveCustomCreature}
-          onSave={handleSaveCustomCreature}
-          onSaveToDB={handleSaveToDB}
-        />
-      )}
+      {isEditorOpen && (() => {
+        const activeEditingCreature = (creatures || []).find((c) => c.id === editingCreatureId) || null;
+        const targetCreatureFood = activeEditingCreature ? Math.max(activeEditingCreature.foodEaten ?? 0, activeEditingCreature.bankFood ?? 0) : 0;
+        const effectiveFood = activeEditingCreature ? (targetCreatureFood > 0 ? targetCreatureFood : localFood) : localFood;
+        return (
+          <CreatureEditor
+            isOpen={isEditorOpen}
+            editingCreature={activeEditingCreature}
+            token={authToken}
+            food={effectiveFood}
+            bankFood={effectiveFood}
+            onSpendFood={handleSpendFood}
+            onDepositFood={handleDepositFood}
+            onSpendBankFood={handleSpendFood}
+            onDepositBankFood={handleDepositFood}
+            onClose={() => {
+              setIsEditorOpen(false);
+            }}
+            onSpawnCreature={handleSaveCustomCreature}
+            onSave={handleSaveCustomCreature}
+            onSaveToDB={handleSaveToDB}
+          />
+        );
+      })()}
 
       {/* Anatomy Legend Modal */}
       {isAnatomyOpen && (
