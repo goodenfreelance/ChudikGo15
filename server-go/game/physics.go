@@ -97,21 +97,27 @@ func StarterPreset() []CreatureElement {
 
 // GetElementCost returns the food purchase price of an element type
 func GetElementCost(t ElementType) int {
+	cfg := GetGlobalConfig()
+	if cfg.Economy.ElementPrices != nil {
+		if cost, ok := cfg.Economy.ElementPrices[string(t)]; ok && cost > 0 {
+			return cost
+		}
+	}
 	switch t {
 	case ElementHeadJaw:
-		return 180
+		return 18
 	case ElementHead:
-		return 50
+		return 5
 	case ElementMuscleRandomLeft, ElementMuscleRandomRight:
-		return 35
+		return 3
 	case ElementMuscleLeft, ElementMuscleRight:
-		return 25
+		return 2
 	case ElementJoint:
-		return 15
+		return 1
 	case ElementEdgeH, ElementEdgeV, ElementEdgeD1, ElementEdgeD2:
-		return 10
+		return 1
 	default:
-		return 10
+		return 1
 	}
 }
 

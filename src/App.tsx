@@ -530,7 +530,6 @@ export default function App() {
     if (!currentEditing) {
       setIsEditorOpen(false);
       setEditingCreatureId(null);
-      setIsRunning(true);
       setToastMessage('⚠️ Чудик погиб или удален! Редактор закрыт.');
       setTimeout(() => setToastMessage(null), 3500);
       return;
@@ -540,25 +539,11 @@ export default function App() {
     if (!inBase) {
       setIsEditorOpen(false);
       setEditingCreatureId(null);
-      setIsRunning(true);
       soundFx.playFlex?.();
       setToastMessage('⚠️ Чудик покинул Базу! Редактирование прервано без сохранения.');
       setTimeout(() => setToastMessage(null), 4000);
     }
   }, [creatures, isEditorOpen, editingCreatureId, worldRadius]);
-
-  // Synchronize Speed and Pause/Play with Go Server
-  useEffect(() => {
-    if (isConnected) {
-      if (isRunning) {
-        const intervalMs = Math.max(10, Math.round(50 / speed));
-        gameWs.sendAdminSetSpeed(intervalMs);
-      } else {
-        // Paused state
-        gameWs.sendAdminSetSpeed(9999999);
-      }
-    }
-  }, [isConnected, isRunning, speed]);
 
   // Synchronize Dash input with Go Server whenever Space is held/released
   useEffect(() => {
@@ -931,7 +916,6 @@ export default function App() {
 
   // Open Editor for Creating NEW Creature
   const handleOpenNewEditor = () => {
-    setIsRunning(false);
     setEditingCreatureId(null);
     setIsEditorOpen(true);
   };
@@ -956,7 +940,6 @@ export default function App() {
       return;
     }
 
-    setIsRunning(false);
     setEditingCreatureId(targetId);
     setSelectedCreatureId(targetId);
     setFocusTimestamp(Date.now());
@@ -1054,7 +1037,6 @@ export default function App() {
     }
 
     setIsEditorOpen(false);
-    setIsRunning(true);
   };
 
   // Confirm Placement at Grid Node
@@ -1344,7 +1326,6 @@ export default function App() {
           onDepositBankFood={handleDepositFood}
           onClose={() => {
             setIsEditorOpen(false);
-            setIsRunning(true);
           }}
           onSpawnCreature={handleSaveCustomCreature}
           onSave={handleSaveCustomCreature}

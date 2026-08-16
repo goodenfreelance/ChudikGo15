@@ -44,7 +44,7 @@ const DEFAULT_CONFIG: WorldConfig = {
   physics: {
     restitutionCoefficient: 0.5,
     dashMultiplier: 1.6,
-    dashFoodCostPerSecond: 2.0,
+    dashFoodCostPerSecond: 1.0,
     dragLinear: 0.01,
     dragAngular: 0.005,
     muscleStiffness: 50.0,
@@ -913,7 +913,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="1"
-                        value={worldConfig.economy?.foodBerryValue ?? 10}
+                        value={worldConfig.economy?.foodBerryValue ?? 1}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -931,7 +931,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="1"
-                        value={worldConfig.economy?.foodGoldenValue ?? 25}
+                        value={worldConfig.economy?.foodGoldenValue ?? 5}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -962,7 +962,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['head'] ?? 50}
+                        value={worldConfig.economy?.elementPrices?.['head'] ?? 5}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -983,7 +983,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['head-jaw'] ?? 180}
+                        value={worldConfig.economy?.elementPrices?.['head-jaw'] ?? 18}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1004,7 +1004,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['muscle-left'] ?? 25}
+                        value={worldConfig.economy?.elementPrices?.['muscle-left'] ?? 2}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1025,7 +1025,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['muscle-right'] ?? 25}
+                        value={worldConfig.economy?.elementPrices?.['muscle-right'] ?? 2}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1046,7 +1046,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['muscle-random-left'] ?? 35}
+                        value={worldConfig.economy?.elementPrices?.['muscle-random-left'] ?? 3}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1067,7 +1067,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['muscle-random-right'] ?? 35}
+                        value={worldConfig.economy?.elementPrices?.['muscle-random-right'] ?? 3}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1088,7 +1088,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['joint'] ?? 15}
+                        value={worldConfig.economy?.elementPrices?.['joint'] ?? 1}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1109,7 +1109,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['edge-h'] ?? 10}
+                        value={worldConfig.economy?.elementPrices?.['edge-h'] ?? 1}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1130,7 +1130,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['edge-v'] ?? 10}
+                        value={worldConfig.economy?.elementPrices?.['edge-v'] ?? 1}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1151,7 +1151,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['edge-d1'] ?? 10}
+                        value={worldConfig.economy?.elementPrices?.['edge-d1'] ?? 1}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,
@@ -1172,7 +1172,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       <input
                         type="number"
                         min="0"
-                        value={worldConfig.economy?.elementPrices?.['edge-d2'] ?? 10}
+                        value={worldConfig.economy?.elementPrices?.['edge-d2'] ?? 1}
                         onChange={(e) =>
                           setWorldConfig({
                             ...worldConfig,

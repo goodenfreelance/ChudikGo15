@@ -37,10 +37,18 @@ type ElementMasses struct {
 	MassMouth  float64 `json:"massMouth"`
 }
 
+type EconomyRules struct {
+	StarterBankFood int            `json:"starterBankFood"`
+	FoodBerryValue  int            `json:"foodBerryValue"`
+	FoodGoldenValue int            `json:"foodGoldenValue"`
+	ElementPrices   map[string]int `json:"elementPrices"`
+}
+
 type WorldConfig struct {
 	World         WorldRules    `json:"world"`
 	Physics       PhysicsRules  `json:"physics"`
 	ElementMasses ElementMasses `json:"elementMasses"`
+	Economy       EconomyRules  `json:"economy"`
 }
 
 var (
@@ -67,7 +75,7 @@ func DefaultWorldConfig() WorldConfig {
 		Physics: PhysicsRules{
 			RestitutionCoefficient: 0.45,
 			DashMultiplier:         1.6,
-			DashFoodCostPerSecond:  2.0,
+			DashFoodCostPerSecond:  1.0,
 			DragLinear:             3.0,
 			DragAngular:            4.5,
 			MuscleStiffness:        40.0,
@@ -81,6 +89,26 @@ func DefaultWorldConfig() WorldConfig {
 			MassMuscle: 0.0,
 			MassEye:    0.2,
 			MassMouth:  0.5,
+		},
+		Economy: EconomyRules{
+			StarterBankFood: 100,
+			FoodBerryValue:  1,
+			FoodGoldenValue: 5,
+			ElementPrices: map[string]int{
+				"head-jaw":           18,
+				"head":               5,
+				"muscle-random-left":  3,
+				"muscle-random-right": 3,
+				"muscle-left":         2,
+				"muscle-right":        2,
+				"joint":               1,
+				"edge-h":              1,
+				"edge-v":              1,
+				"edge-d1":             1,
+				"edge-d2":             1,
+				"eye":                 1,
+				"mouth":               1,
+			},
 		},
 	}
 }
@@ -304,5 +332,17 @@ func validateConfig(cfg *WorldConfig) {
 	}
 	if cfg.ElementMasses.MassMouth < 0 {
 		cfg.ElementMasses.MassMouth = 0.5
+	}
+	if cfg.Economy.FoodBerryValue <= 0 {
+		cfg.Economy.FoodBerryValue = 1
+	}
+	if cfg.Economy.FoodGoldenValue <= 0 {
+		cfg.Economy.FoodGoldenValue = 5
+	}
+	if cfg.Economy.StarterBankFood < 0 {
+		cfg.Economy.StarterBankFood = 100
+	}
+	if cfg.Economy.ElementPrices == nil {
+		cfg.Economy.ElementPrices = make(map[string]int)
 	}
 }

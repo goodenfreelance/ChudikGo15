@@ -108,15 +108,22 @@ func (r *Room) spawnRandomFood() {
 	x := math.Round((r.rnd.Float64() - 0.5) * (r.worldRadius * 1.8))
 	y := math.Round((r.rnd.Float64() - 0.5) * (r.worldRadius * 1.8))
 
+	cfg := GetGlobalConfig()
 	foodType := FoodBerry
-	val := 10
+	val := cfg.Economy.FoodBerryValue
+	if val <= 0 {
+		val = 1
+	}
 	typeRoll := r.rnd.Float64()
 	if typeRoll > 0.85 {
 		foodType = FoodGolden
-		val = 25
+		val = cfg.Economy.FoodGoldenValue
+		if val <= 0 {
+			val = 5
+		}
 	} else if typeRoll > 0.65 {
 		foodType = FoodSuper
-		val = 15
+		val = int(math.Max(2, float64(val)*2))
 	}
 
 	f := Food{
@@ -224,11 +231,16 @@ func (r *Room) DepositBankFood(playerID string, amount int) int {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
+	// Try player-%s or direct ID
 	cID := fmt.Sprintf("player-%s", playerID)
-	if c, exists := r.creatures[cID]; exists && c != nil {
+	c, exists := r.creatures[cID]
+	if !exists || c == nil {
+		c, exists = r.creatures[playerID]
+	}
+	if exists && c != nil {
 		c.FoodEaten += amount
 		c.BankFood = c.FoodEaten
-		c.Score += amount * 10
+		c.Score += amount
 		return c.FoodEaten
 	}
 	return 0
@@ -242,7 +254,11 @@ func (r *Room) SpendBankFood(playerID string, amount int) bool {
 	defer r.mu.Unlock()
 
 	cID := fmt.Sprintf("player-%s", playerID)
-	if c, exists := r.creatures[cID]; exists && c != nil {
+	c, exists := r.creatures[cID]
+	if !exists || c == nil {
+		c, exists = r.creatures[playerID]
+	}
+	if exists && c != nil {
 		if c.FoodEaten >= amount {
 			c.FoodEaten -= amount
 			c.BankFood = c.FoodEaten
@@ -427,11 +443,18 @@ func (r *Room) AddFoodAt(x, y float64, foodType FoodType) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	val := 10
+	cfg := GetGlobalConfig()
+	val := cfg.Economy.FoodBerryValue
+	if val <= 0 {
+		val = 1
+	}
 	if foodType == FoodGolden {
-		val = 25
+		val = cfg.Economy.FoodGoldenValue
+		if val <= 0 {
+			val = 5
+		}
 	} else if foodType == FoodSuper {
-		val = 15
+		val = int(math.Max(2, float64(val)*2))
 	}
 
 	id := fmt.Sprintf("food-custom-%d-%d", time.Now().UnixNano(), r.rnd.Intn(1000))
@@ -707,17 +730,23 @@ func (r *Room) Tick() {
 				delete(r.foods, eaten.ID)
 				foodGain := eaten.Value
 				if foodGain <= 0 {
-					foodGain = 10
+					foodGain = cfg.Economy.FoodBerryValue
+					if foodGain <= 0 {
+						foodGain = 1
+					}
 					if eaten.Type == FoodSuper {
-						foodGain = 15
+						foodGain = int(math.Max(2, float64(foodGain)*2))
 					} else if eaten.Type == FoodGolden {
-						foodGain = 25
+						foodGain = cfg.Economy.FoodGoldenValue
+						if foodGain <= 0 {
+							foodGain = 5
+						}
 					}
 				}
 				c.FoodEaten += foodGain
 				c.BankFood = c.FoodEaten
-				c.Score += eaten.Value
-				c.Energy = math.Min(c.MaxEnergy, c.Energy+float64(eaten.Value)*1.2)
+				c.Score += foodGain
+				c.Energy = math.Min(c.MaxEnergy, c.Energy+float64(foodGain)*1.2)
 				c.IsSleeping = false
 			}
 		}

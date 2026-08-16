@@ -22,91 +22,91 @@ interface CreatureEditorProps {
 const ELEMENT_TOOLS: { type: ElementType | 'eraser'; label: string; symbol: string; weight: number; price: number; desc: string }[] = [
   {
     type: 'head-jaw',
-    label: 'Челюсть к голове (🦷 180 еды)',
+    label: 'Челюсть к голове (🦷)',
     symbol: '🦷',
     weight: 0,
-    price: 180,
+    price: 18,
     desc: 'Крепится строго к голове (👁️). Активирует канибализм: кусает врагов в секторе 60° по направлению головы',
   },
   {
     type: 'head',
-    label: 'Голова обычная (👁️ 50 еды)',
+    label: 'Голова обычная (👁️)',
     symbol: '👁️',
     weight: 0,
-    price: 50,
-    desc: 'Задает ВПЕРЕД для чудика и ориентацию глаз (50 еды)',
+    price: 5,
+    desc: 'Задает ВПЕРЕД для чудика и ориентацию глаз',
   },
   {
     type: 'joint',
-    label: 'Шарнир (◯ 15 еды)',
+    label: 'Шарнир (◯)',
     symbol: '◯',
     weight: 0,
-    price: 15,
-    desc: 'Узел вращения на пересечении клеток (Вес = 0, 15 еды)',
+    price: 1,
+    desc: 'Узел вращения на пересечении клеток (Вес = 0)',
   },
   {
     type: 'edge-h',
-    label: 'Ребро гориз. (— 10 еды)',
+    label: 'Ребро гориз. (—)',
     symbol: '—',
     weight: 1,
-    price: 10,
-    desc: 'Каркасная балка длиной 1 клетка (Вес = 1, 10 еды)',
+    price: 1,
+    desc: 'Каркасная балка длиной 1 клетка (Вес = 1)',
   },
   {
     type: 'edge-v',
-    label: 'Ребро вертик. (| 10 еды)',
+    label: 'Ребро вертик. (|)',
     symbol: '|',
     weight: 1,
-    price: 10,
-    desc: 'Каркасная балка длиной 1 клетка (Вес = 1, 10 еды)',
+    price: 1,
+    desc: 'Каркасная балка длиной 1 клетка (Вес = 1)',
   },
   {
     type: 'edge-d1',
-    label: 'Ребро диаг. / (↙-↗ 10 еды)',
+    label: 'Ребро диаг. / (↙-↗)',
     symbol: '/',
     weight: 1,
-    price: 10,
-    desc: 'Диагональ / (Вес = 1, 10 еды)',
+    price: 1,
+    desc: 'Диагональ / (Вес = 1)',
   },
   {
     type: 'edge-d2',
-    label: 'Ребро диаг. \\ (↖-↘ 10 еды)',
+    label: 'Ребро диаг. \\ (↖-↘)',
     symbol: '\\',
     weight: 1,
-    price: 10,
-    desc: 'Диагональ \\ (Вес = 1, 10 еды)',
+    price: 1,
+    desc: 'Диагональ \\ (Вес = 1)',
   },
   {
     type: 'muscle-left',
-    label: 'Мышца влево (⟲ 25 еды)',
+    label: 'Мышца влево (⟲)',
     symbol: '⟲',
     weight: 0,
-    price: 25,
-    desc: 'Крепится к шарниру (◯). Тяга влево (25 еды)',
+    price: 2,
+    desc: 'Крепится к шарниру (◯). Тяга влево',
   },
   {
     type: 'muscle-right',
-    label: 'Мышца вправо (⟳ 25 еды)',
+    label: 'Мышца вправо (⟳)',
     symbol: '⟳',
     weight: 0,
-    price: 25,
-    desc: 'Крепится к шарниру (◯). Тяга вправо (25 еды)',
+    price: 2,
+    desc: 'Крепится к шарниру (◯). Тяга вправо',
   },
   {
     type: 'muscle-random-left',
-    label: 'Случ. мышца влево (🎲⟲ 35 еды)',
+    label: 'Случ. мышца влево (🎲⟲)',
     symbol: '🎲⟲',
     weight: 0,
-    price: 35,
-    desc: 'Случайный шанс сокращения (5%-90%, 35 еды)',
+    price: 3,
+    desc: 'Случайный шанс сокращения (5%-90%)',
   },
   {
     type: 'muscle-random-right',
-    label: 'Случ. мышца вправо (🎲⟳ 35 еды)',
+    label: 'Случ. мышца вправо (🎲⟳)',
     symbol: '🎲⟳',
     weight: 0,
-    price: 35,
-    desc: 'Случайный шанс сокращения (5%-90%, 35 еды)',
+    price: 3,
+    desc: 'Случайный шанс сокращения (5%-90%)',
   },
   {
     type: 'eraser',
@@ -679,7 +679,8 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
               </label>
               <div className="grid grid-cols-1 gap-1.5 max-h-56 overflow-y-auto pr-1">
                 {ELEMENT_TOOLS.map((tool) => {
-                  const isAffordable = tool.type === 'eraser' || availableFood >= tool.price;
+                  const dynamicPrice = tool.type === 'eraser' ? 0 : (ELEMENT_PRICES[tool.type as ElementType] ?? tool.price);
+                  const isAffordable = tool.type === 'eraser' || availableFood >= dynamicPrice;
                   const isSelected = selectedTool === tool.type;
                   return (
                     <button
@@ -706,7 +707,7 @@ export const CreatureEditor: React.FC<CreatureEditorProps> = ({
                               <span className={`text-3xs font-mono font-bold px-1 py-0.2 rounded ${
                                 isAffordable ? 'text-emerald-400 bg-emerald-950/60' : 'text-rose-400 bg-rose-950/60'
                               }`}>
-                                {tool.price} еды
+                                {dynamicPrice} еды
                               </span>
                             )}
                           </div>
