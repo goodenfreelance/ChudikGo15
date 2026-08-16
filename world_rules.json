@@ -1,0 +1,46 @@
+{
+  "world": {
+    "worldBoundsX": 100.0,
+    "worldBoundsY": 100.0,
+    "tickRate": 60,
+    "enableCannibalism": true
+  },
+  "physics": {
+    "restitutionCoefficient": 0.45,
+    "dashMultiplier": 1.6,
+    "dashFoodCostPerSecond": 2.0,
+    "dragLinear": 3.0,
+    "dragAngular": 4.5,
+    "muscleStiffness": 40.0,
+    "muscleDamping": 5.0,
+    "sleepVelocityThreshold": 0.05
+  },
+  "elementMasses": {
+    "massHead": 1.0,
+    "massBone": 1.0,
+    "massJoint": 0.0,
+    "massMuscle": 0.0,
+    "massEye": 0.2,
+    "massMouth": 0.5
+  },
+  "economy": {
+    "starterBankFood": 100,
+    "foodBerryValue": 10,
+    "foodGoldenValue": 25,
+    "elementPrices": {
+      "head-jaw": 180,
+      "head": 50,
+      "muscle-random-left": 35,
+      "muscle-random-right": 35,
+      "muscle-left": 25,
+      "muscle-right": 25,
+      "joint": 15,
+      "edge-h": 10,
+      "edge-v": 10,
+      "edge-d1": 10,
+      "edge-d2": 10,
+      "eye": 10,
+      "mouth": 10
+    }
+  }
+}
